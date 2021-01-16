@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  nginx:
+    build: ./nginx
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "5000:5000"
+
+  app:
+    build: ./app
+    environment:
+      - REDIS_HOST=redis
+    env_file:
+      - ./app/docker.env
+    depends_on:
+      - redis
+
+  redis:
+    image: redis

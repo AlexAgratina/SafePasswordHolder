@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pl" class="h-100">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <!-- Font Awesome5 -->
+  <script src="https://kit.fontawesome.com/99f6a3dd35.js" crossorigin="anonymous"></script>
+
+  <!-- My stylesheet -->
+  <link rel="stylesheet" href={{ url_for('static', filename='css/base.css') }}>
+  {% block css_links %}{% endblock %}
+
+  {% if title %}
+  <title>{{ title }}</title>
+  {% else %}
+  <title>Safe password holder</title>
+  {% endif %}
+</head>
+
+<body class="d-flex flex-column h-100">
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+      <a class="navbar-brand" href={{url_for('index')}}>
+        <img class="app-icon" src={{url_for('static', filename='img/App-logo-img.png')}}>
+        Safe Password Holder
+      </a>
+
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse sticky-top navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          {% if current_user.is_authenticated %}
+          <li class="nav-item mr-3">
+            <a class="nav-link btn" href={{url_for('passwords.my_passwords')}}>Moje hasła</a>
+          </li>
+          <li class="nav-item mr-3">
+            <a class="nav-link btn" href={{url_for('account.account')}}>Konto</a>
+          </li>
+          {% endif %}
+          {% if current_user.is_authenticated %}
+          <li class="nav-item mr-3">
+            <a class="nav-link btn btn-danger" href={{url_for('account.logout')}}>Wyloguj</a>
+          </li>
+          {% else %}
+          <li class="nav-item mr-3">
+            <a class="nav-link btn btn-warning" href={{url_for('account.login')}}>Logowanie</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    {% if current_user.is_authenticated %}
+    <section class="login-lnfo pt-md-2">
+      <p class="text-center text-muted">Zalogowany jako:
+        <span class="font-weight-bold">{{current_user.login}}</span>
+      </p>
+    </section>
+    {% endif %}
+
+  </header>
+
+  <main role="main" class="flex-shrink-0">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <section class="container messages">
+      <ul class=flashes>
+
+        {% for category, message in messages %}
+        <li class="alert {{ category }} alert-dismissible fade show mt-2" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </li>
+        {% endfor %}
+
+      </ul>
+    </section>
+    {% endif %}
+    {% endwith %}
+
+    {% block main %}{% endblock %}
+  </main>
+
+  <footer class="pb-1 pt-2 mt-auto">
+    <div class="container text-muted text-center">
+      <p>W razie jakichkolwiek problemów z systemem proszę kontaktować się z studentem Oleksandr Agratina</p>
+    </div>
+  </footer>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+
+  {% block js %}{% endblock %}
+</body>
+
+</html>

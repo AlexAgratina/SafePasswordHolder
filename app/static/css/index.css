@@ -1,0 +1,10 @@
+.intro {
+    max-width: 800px;
+    /* color: brown; */
+}
+
+@media (max-width: 600px) {
+    .intro h1 {
+        font-size: 30px;
+    }
+}

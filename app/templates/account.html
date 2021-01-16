@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block css_links %}
+{% endblock %}
+
+{% block main %}
+<section class="container card mt-sm-5 mt-2">
+  <div class="card-body">
+    <h3 class="card-title text-center">Dane konta</h3>
+
+    <p class="mr-4"><b>Login:</b> {{current_user.login}}</p>
+
+    <div class="d-flex align-items-baseline">
+      <p class="mr-4"><b>Email:</b> {{current_user.email}}</p>
+      <button class="btn btn-secondary disabled">Zmień</button>
+    </div>
+
+    <a class="btn btn-danger" href={{url_for('account.change_password')}}>Resetuj hasło</a>
+
+    <hr>
+
+    <section>
+      <h4>Historia logowań</h4>
+
+      <table class="table mt-3">
+        <thead>
+          <tr>
+            <th scope="col">Data</th>
+            <th scope="col">IP</th>
+            <th scope="col">Udane</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for login in login_attempts %}
+          <tr>
+            <td>{{ login.time }}</td>
+            <td>{{ login.ip }}</td>
+            <td>
+              {% if login.successful %}
+              <span class="text-success">TAK</span>
+              {% else %}
+              <span class="text-danger">NIE</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

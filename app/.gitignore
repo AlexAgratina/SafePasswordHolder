@@ -1,0 +1,8 @@
+# Python virtual enviroment
+venv
+
+# Python biuld cashe
+__pycache__
+
+# Database
+*.db

@@ -1,0 +1,35 @@
+.navbar {
+    background-color: rgb(102, 190, 228);
+    font-weight: 500;
+    color: red;
+}
+
+.app-icon {
+    height: 2.5rem;
+    margin: 0 10px;
+}
+
+.nav-link {
+    color: black !important;
+}
+
+.nav-link.disabled {
+    color: rgb(91, 91, 91) !important;
+}
+
+#login-button {
+    border-width: 2px;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+body>footer {
+    background-color: black;
+}
+
+.messages ul.flashes {
+    list-style-type: none;
+    padding-left: 0;
+}

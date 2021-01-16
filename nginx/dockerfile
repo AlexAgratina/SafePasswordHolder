@@ -1,0 +1,6 @@
+FROM nginx
+
+EXPOSE 80
+EXPOSE 5000
+
+COPY . /etc/nginx/
