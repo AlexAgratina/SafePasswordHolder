@@ -4,6 +4,7 @@ from forms import CreatePasswordForm
 from models import db, User, Password
 import base64
 import hashlib
+from Crypto.Cipher import AES
 
 passwords = Blueprint('passwords', __name__, template_folder='templates')
 
@@ -13,16 +14,37 @@ def my_passwords():
     user = User.query.filter_by(id=current_user.id).first()
     form = CreatePasswordForm(meta={'csrf_context': session})
     message = form.password.data
-    print (type(user.password_hash))
-    print (user.password_hash)
 
-    test = str(form.password.data)
-    testText = test.encode()
-    hashed = hashlib.pbkdf2_hmac('sha256', testText, (user.password_hash).encode(), 100000)
+    if not message: 
+        message = b''
+    else:
+        message = message.encode()
+
+    # print (type(user.password_hash))
+    # print (user.password_hash)
+
+    key = user.password_hash.encode()
+
+    # берется первые 16 битов с нашего ключа
+    aes = AES.new(key[:16], AES.MODE_EAX)
+
+    nonce = aes.nonce
+
+    ciphertext, tag = aes.encrypt_and_digest(message)
+    
+    # decryption
+    ciphered = AES.new(key[:16], AES.MODE_EAX, nonce=nonce)
+
+    plaintext = ciphered.decrypt(ciphertext)
+    try:
+        ciphered.verify(tag)
+        print("The message is authentic:", plaintext)
+    except ValueError:
+        print("Key incorrect or message corrupted")
 
     if form.validate_on_submit():
         name = form.name.data
-        password = hashed.hex()
+        password = ciphertext
         url = form.url.data
         new_password = Password(name=name, password=password,
                     url=url, owner=user)
