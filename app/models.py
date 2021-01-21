@@ -10,7 +10,6 @@ db = SQLAlchemy()
 TOKEN_VALID_TIME = timedelta(minutes=30)
 TOKEN_LENGTH = 50
 
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     login = db.Column(db.String(), index=True, unique=True)
@@ -43,11 +42,16 @@ class Password(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String())
     password = db.Column(db.String())
+    nonce = db.Column(db.String())
     url = db.Column(db.String())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    def set_password(self, password):
+        self.password = password
+
     def __repr__(self):
         return f'<Password id={self.id} name={self.name}>'
+
 
 class Login(db.Model):
     """Log user login attempts"""
@@ -56,6 +60,7 @@ class Login(db.Model):
     successful = db.Column(db.Boolean())
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     ip = db.Column(db.String())
+
 
 def fill_db_with_values():
     test_user = User(

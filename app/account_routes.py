@@ -102,7 +102,7 @@ def login():
         next_page = session.get('next', None)
         session['next'] = None
         if not next_page:
-            next_page = url_for('passwords.view_passwords')
+            next_page = url_for('passwords.my_passwords')
         return redirect(next_page)
 
     return render_template('login.html', form=form)

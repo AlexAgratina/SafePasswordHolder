@@ -36,3 +36,4 @@ wrapt
 WTForms
 email_validator
 cryptography
+pycryptodome
