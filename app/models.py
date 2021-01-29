@@ -64,7 +64,11 @@ class Login(db.Model):
 
 def fill_db_with_values():
     test_user = User(
-        login='sasha', email='sasha.agratina@gmail.com', lucky_number=5)
+        login='sasha', email='sasha.agratina@gmail.com')
     test_user.set_password('Password.123')
     db.session.add(test_user)
+    fakeadmin_user = User(
+        login='admin', email='adminwszechmogacy@gmail.com')
+    fakeadmin_user.set_password('Admin123')
+    db.session.add(fakeadmin_user)
     db.session.commit()

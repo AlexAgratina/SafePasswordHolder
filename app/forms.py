@@ -46,6 +46,10 @@ class UniqueEmail(object):
 
 
 class RegisterForm(BaseForm):
+    def my_entropy_check(form, field):
+        if entropy(field.data.encode()) < 0.9:
+            raise ValidationError('Za słabe hasło')
+
     login = StringField('login', validators=[
         DataRequired('Brak loginu'),
         Length(min=4, message='Login musi mieć co najmniej 4 znaki'),
@@ -55,9 +59,10 @@ class RegisterForm(BaseForm):
     ])
 
     password = PasswordField('password', validators=[
-        DataRequired('Brak hasła'),
+        DataRequired('Wpisz hasło'),
         Length(min=6, message='Hasło musi mieć co najmniej 6 znaków'),
-        Length(max=72, message='Hasło może mieć co najwyżej 72 znaki')
+        Length(max=72, message='Hasło może mieć co najwyżej 72 znaki'),
+        my_entropy_check
     ])
     password2 = PasswordField('Password', validators=[
         EqualTo('password', 'Hasła się różnią')
@@ -188,3 +193,13 @@ class ResetPasswordForm(BaseForm):
     password2 = PasswordField('password2', validators=[
         EqualTo('password', 'Hasła się różnią')
     ])
+
+def entropy(data : bytes) -> float:
+    if not data:
+        return 0
+    count = {i : 0 for i in range(256)}
+    for b in data: count[b] += 1
+    p = lambda b: count[b] / len(data)
+    entropy = sum((p(b) * count[b] for b in range(256)))
+        
+    return 1 - entropy / len(data)
