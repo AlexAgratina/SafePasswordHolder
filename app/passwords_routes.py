@@ -44,18 +44,18 @@ def my_passwords():
     # print('NONCEBEFORE', nonce.decode('utf-16'))
     # print('NONCEAFTER', str(nonce).encode('utf-16')[2:])
 
-    print("!!!WYPISANY KLUCZ!!!")
-    print(key)
-    print("!!!WYPISANY CIPHERTEXT!!!")
-    print(b64encode(ciphertext))
-    print("!!!WYPISANY NONCE!!!")
-    print(nonce) 
-    print("!!!WYPISANY message!!!")
-    print(message)
+    # print("!!!WYPISANY KLUCZ!!!")
+    # print(key)
+    # print("!!!WYPISANY CIPHERTEXT!!!")
+    # print(b64encode(ciphertext))
+    # print("!!!WYPISANY NONCE!!!")
+    # print(nonce) 
+    # print("!!!WYPISANY message!!!")
+    # print(message)
 
     if form.validate_on_submit():
         name = form.name.data
-        password = b64encode(ciphertext)
+        password = message.decode('utf-8')
         url = form.url.data
         new_password = Password(name=name, password=password,
                                 nonce=b64encode(nonce),
@@ -93,9 +93,9 @@ def unhash_password(id, password, nonce):
 
     user = User.query.filter_by(id=current_user.id).first()
     key = user.password_hash.encode()
-    print('password', password)
-    print('nonce', nonce)
-    print('nonce decoded', (b64decode(nonce))[3:-1])
+    # print('password', password)
+    # print('nonce', nonce)
+    # print('nonce decoded', (b64decode(nonce))[3:-1])
     ciphered = AES.new(key[16:32], AES.MODE_EAX,
                        nonce=b64decode(nonce))
     plaintext = ciphered.decrypt(password.encode('utf-8'))

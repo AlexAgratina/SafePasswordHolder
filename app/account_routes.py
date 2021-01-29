@@ -5,13 +5,13 @@ from flask_login import current_user, login_user, logout_user, login_required
 from forms import RegisterForm, LoginForm, ChangePasswordForm, RecoverPasswordForm, ResetPasswordForm
 from models import db, User, Login, RecoveryToken
 import bcrypt
-import smtplib
 import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from urllib.parse import urlsplit, urlunsplit
 from datetime import datetime, timedelta
 from time import sleep
+import random
 
 users = Blueprint('account', __name__, template_folder='templates')
 
@@ -26,30 +26,6 @@ def calculate_login_delay(login_count: int) -> int:
 
     return 20
 
-
-def send_email(adres: str, title: str, content: str) -> None:
-    port = 465  # For SSL
-    mail_login = current_app.config['GMAIL_LOGIN']
-    mail_password = current_app.config['GMAIL_PASSWORD']
-
-    if not mail_login or not mail_password:
-        abort(500)
-
-    sender_email = mail_login
-    receiver_email = adres
-    message = MIMEMultipart("alternative")
-    message["Subject"] = title
-    message["From"] = sender_email
-    message["To"] = receiver_email
-
-    part1 = MIMEText(content, "plain")
-    message.attach(part1)
-
-    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=ssl.create_default_context()) as server:
-        server.login(mail_login, mail_password)
-        server.sendmail(sender_email, receiver_email, message.as_string())
-
-
 @users.route('/register', methods=['GET', 'POST'])
 def register():
     logout_user()
@@ -61,13 +37,11 @@ def register():
         login = form.login.data
         password = form.password.data
         email = form.email.data
-        lucky_number = form.lucky_number.data
-
         password_hash = bcrypt.hashpw(
             password.encode(), bcrypt.gensalt()).decode()
 
         user = User(login=login, password_hash=password_hash,
-                    email=email, lucky_number=lucky_number)
+                    email=email)
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('index'))
@@ -153,27 +127,18 @@ def recover_password():
     if form.validate_on_submit():
         login = form.login.data
         user = User.query.filter_by(login=login).first()
-        email = user.email
-
+        
         recovery_token = RecoveryToken(user=user)
         db.session.add(recovery_token)
         db.session.commit()
-
-        # Build link
-        app_url_parts = urlsplit(request.base_url)
-        url_path = url_for('account.validate_password_token')
-        url_query = f'user={login}&token={recovery_token.token}'
-        recovery_link = urlunsplit(
-            (app_url_parts.scheme, app_url_parts.netloc, url_path, url_query, ''))
-
-        topic = 'Recover password'
-        message = f'Żeby zresetować hasło przejdź pod ten link: {recovery_link}'
-
-        send_email(email, topic, message)
-
-        flash('Na adres email podany przy rejestracji został wysłany email z linkiem do resetu hasła',
-              'alert alert-success')
-        return redirect(url_for('account.login'))
+        
+        code = random.randint(100000, 999999)
+        print ("KOD", code)
+        
+        session['login'] = login
+        session['code'] = code
+        
+        return redirect(url_for('account.reset_password'))
 
     return render_template('recover_password.html', form=form)
 
@@ -207,19 +172,17 @@ def validate_password_token():
 
 @users.route('/resetPassword', methods=['GET', 'POST'])
 def reset_password():
-    login = session.get('login', None)
-    if not session.get('can_reset_password', None) or not login:
-        abort(400)
-
+    login = session['login']
+    code = str(session['code'])
+   
     form = ResetPasswordForm(meta={'csrf_context': session})
     if form.validate_on_submit():
-        password = form.password.data
-        user = User.query.filter_by(login=login).first()
-        user.set_password(password)
-        db.session.commit()
-
-        session['can_reset_password'] = False
-        flash('Hasło zostało zmienione', 'alert alert-success')
-        return redirect(url_for('account.login'))
+        currentCode = str(form.code.data)
+        if currentCode == code:
+            password = form.password.data
+            user = User.query.filter_by(login=login).first()
+            user.set_password(password)
+            db.session.commit()
+            return redirect(url_for('account.login'))
 
     return render_template('reset_password.html', form=form)

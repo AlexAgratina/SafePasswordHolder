@@ -74,13 +74,6 @@ class RegisterForm(BaseForm):
         UniqueEmail()
     ])
 
-    lucky_number = IntegerField('Lucky number', validators=[
-        DataRequired('Brak szczęśliwej liczby :('),
-        NumberRange(-10000000, 10000000,
-                    'Liczba musi być z przedziału od -10000000 do 10000000')
-    ])
-
-
 class LoginInDatabase(object):
     def __init__(self, message=None):
         if not message:
@@ -155,22 +148,6 @@ class CreatePasswordForm(BaseForm):
     ])
 
 
-class CorrectLuckyNumber(object):
-    def __init__(self, message=None):
-        if not message:
-            message = 'Nieprawidłowa liczba'
-        self.message = message
-
-    def __call__(self, form, field):
-        login = form.login.data
-        lucky_number = field.data
-        with current_app.app_context():
-            user = User.query.filter(User.login == login).first()
-            if user is None:
-                return
-            if user.lucky_number != lucky_number:
-                raise ValidationError(self.message)
-
 
 class RecoverPasswordForm(BaseForm):
     login = StringField('login', validators=[
@@ -178,17 +155,22 @@ class RecoverPasswordForm(BaseForm):
         LoginInDatabase()
     ])
 
-    lucky_number = IntegerField('Lucky number', validators=[
-        DataRequired('Brak szczęśliwej liczby'),
-        CorrectLuckyNumber()
-    ])
-
 
 class ResetPasswordForm(BaseForm):
+    def my_entropy_check(form, field):
+        if entropy(field.data.encode()) < 0.9:
+            raise ValidationError('Za słabe hasło')
+
+    code = StringField('code', validators=[
+        DataRequired('Brak kodu'),
+        Length(min=6, message='Kod musi mieć co najmniej 6 znaków'),
+        Length(max=6, message='Kod musi mieć co najwyżej 6 znaki')
+    ])
     password = PasswordField('password', validators=[
         DataRequired('Brak hasła'),
         Length(min=6, message='Hasło musi mieć co najmniej 6 znaków'),
-        Length(max=72, message='Hasło może mieć co najwyżej 72 znaki')
+        Length(max=72, message='Hasło może mieć co najwyżej 72 znaki'),
+        my_entropy_check
     ])
     password2 = PasswordField('password2', validators=[
         EqualTo('password', 'Hasła się różnią')

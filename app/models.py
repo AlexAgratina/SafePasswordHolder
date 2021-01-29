@@ -15,7 +15,6 @@ class User(UserMixin, db.Model):
     login = db.Column(db.String(), index=True, unique=True)
     email = db.Column(db.String(), unique=True)
     password_hash = db.Column(db.String())
-    lucky_number = db.Column(db.Integer)
     passwords = db.relationship('Password', backref='owner', lazy=True)
     login_attempts = db.relationship('Login', backref='user', lazy=True)
     recovery_tokens = db.relationship(
